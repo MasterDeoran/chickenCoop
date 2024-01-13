@@ -19,6 +19,7 @@
 #include "WLANManager.hpp"
 #include "EEPROMManager.hpp"
 #include "../config.h"
+#include "../object/OTAUpdater.hpp"
 
 
 
@@ -44,6 +45,7 @@ class WebsiteManager {
         void handleRoot();
         void handleWlanSave();
         void handleStart();
+        void handleFirmwareUpdate();
 
     //--------------------------- Variables -----------------------------------------
     public:

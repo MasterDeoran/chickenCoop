@@ -1,0 +1,35 @@
+<html>
+    <meta name='viewport' content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no'/>
+<style>
+    body {
+        text-align: center;
+        background-color: cornflowerblue;
+    }
+
+    div,
+    input {
+        margin: 5px;
+    }
+</style>
+
+<body>
+
+    <h1>ESP-Konfiguration</h1>
+
+    <form action='/load'>
+        <h2>Overview</h2>
+        <div>Version: 1.0</div>
+        <input type='submit' value='ESP Start'>
+    </form>
+    <form action='/speichern'>
+        <h2>WLAN - Settings</h2>
+        <div>SSID</div><input type='text' name='ssid'><br>
+        <div>Password: </div><input type='password' name='password'><br><input type='submit' value='Save'>
+    </form>
+    <form method='POST' action='/update' enctype='multipart/form-data'>
+        <input type='file' name='update'>
+        <input type='submit' value='Update'>
+    </form>
+</body>
+
+</html>

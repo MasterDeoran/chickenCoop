@@ -15,6 +15,7 @@
     ESP8266WebServer server(SERVER_PORT); // Port 80 für den Webserver  
 #endif
 
+OTAUpdater otaUpdater(server);
 
 WebsiteManager* WebsiteManager::instance = nullptr; // Initialisiere statische Instanz
 
@@ -50,6 +51,13 @@ void WebsiteManager::websiteInit() {
     server.on("/", handleRootStatic);
     server.on("/speichern", handleWlanSaveStatic);
     server.on("/load", handleStartStatic);
+    server.on("/update", HTTP_POST, []() {
+        server.sendHeader("Connection", "close");
+        server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+        ESP.restart();
+        }, []() { otaUpdater.handleFirmwareUpload();
+    });
+
     server.begin();
 }
 
@@ -83,7 +91,7 @@ void WebsiteManager::handleRoot()
 {
     String html;
     switch (this->rootPage) {
-        case 0: html = "<html> <meta name='viewport' content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no'/> <style> body { text-align: center; background-color: cornflowerblue; } div, input { margin: 5px; } </style> <body> <h1>ESP-Konfiguration</h1> <form action='/load'> <h2>Overview</h2> <div>Version: 1.0</div> <input type='submit' value='ESP Start'> </form> <form action='/speichern'> <h2>WLAN - Settings</h2> <div>SSID</div><input type='text' name='ssid'><br> <div>Password: </div><input type='password' name='password'><br><input type='submit' value='Save'> </form> </body> </html>"; break;
+        case 0: html = "<html> <meta name='viewport' content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no'/> <style> body { text-align: center; background-color: cornflowerblue; } div, input { margin: 5px; } </style> <body> <h1>ESP-Konfiguration</h1> <form action='/load'> <h2>Overview</h2> <div>Version: 1.0</div> <input type='submit' value='ESP Start'> </form> <form action='/speichern'> <h2>WLAN - Settings</h2> <div>SSID</div><input type='text' name='ssid'><br> <div>Password: </div><input type='password' name='password'><br><input type='submit' value='Save'> </form> <form method='POST' action='/update' enctype='multipart/form-data'> <input type='file' name='update'> <input type='submit' value='Update'> </form> </body> </html>"; break;
         case 1: html = "<html> <meta name='viewport' content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no' /> <style> body { text-align: center; background-color: cornflowerblue; } div, input { margin: 5px; } </style> <body> <h1>ESP Sensorbox</h1> <h2>Overview</h2> <div>Version: 1.0</div> <div>WLAN: %s1%</div> <div>SSID: %s2%</div> <div>IP-Address: %s3%</div> </body> </html>"; break;
     }
 
@@ -132,6 +140,10 @@ void WebsiteManager::handleWlanSave()
     this->handleRoot();
     //server.send(200, "text/plain", "Einstellungen gespeichert. Neustart...");
     // Neustart und Verbindung mit den neuen Daten
+}
+
+void WebsiteManager::handleFirmwareUpdate() {
+
 }
 
 void WebsiteManager::loop() {

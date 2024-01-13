@@ -2,7 +2,7 @@
 #include "manager/EEPROMManager.hpp"
 #include "manager/WebsiteManager.hpp"
 #include "manager/WLANManager.hpp"
-#include "manager/SensorManager.hpp"
+
 
 
 void setup()
@@ -12,14 +12,13 @@ void setup()
     EEPROMManager::initialize();
     //WiFi.setHostname("ESP-041369");
     website.initialize();
-    Serial.println("Start des Microcontrollers");
-    Sensor.initialize();
+    Serial.println("Start des Microcontrollers22");
 }
 
 void loop()
 {
     website.loop();
-    Sensor.loop();
+
     if (website.isInitialize()) {
         wlan.verbindeMitWLAN();
         delay(100);
