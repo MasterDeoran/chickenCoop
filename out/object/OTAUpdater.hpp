@@ -12,10 +12,10 @@
 
 #ifdef ESP32
     #include <WebServer.h> // Für ESP32
-#else
-    #include <ESP8266WebServer.h> // Für ESP8266
-#endif
-#include <Update.h>
+    #include <Update.h>
+
+
+
 
 //-----------------------------------------------------------------------------
 // Class
@@ -55,7 +55,7 @@ class OTAUpdater {
 
 };
 
-
+#endif
 #endif
 
 //=============================================================================

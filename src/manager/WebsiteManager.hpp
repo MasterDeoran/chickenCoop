@@ -11,15 +11,20 @@
 #define __WEBSITEMANAGER_H__
 
 #include <Arduino.h>
-#ifdef ESP32
-    #include <WebServer.h> // Für ESP32
-#else
-    #include <ESP8266WebServer.h> // Für ESP8266
-#endif
+// #ifdef ESP32
+//     #include <WebServer.h> // Für ESP32
+//     #include "../object/OTAUpdater.hpp"
+// #else
+//     #include <ESP8266WebServer.h> // Für ESP8266
+// #endif
+
 #include "WLANManager.hpp"
 #include "EEPROMManager.hpp"
+#include "InterfaceManager.hpp"
 #include "../config.h"
-#include "../object/OTAUpdater.hpp"
+#include "../object/websocket.h"
+#include "../object/pages.h"
+
 
 
 
@@ -39,13 +44,21 @@ class WebsiteManager {
         void serverBegin();
     private:
         static WebsiteManager* instance; // Statische Instanz für den Zugriff in den Callbacks
-        static void handleRootStatic(); // Statische Wrapper-Funktionen
+        static void handleRootStatic(AsyncWebServerRequest *request); // Statische Wrapper-Funktionen
         static void handleWlanSaveStatic();
         static void handleStartStatic();
-        void handleRoot();
+        static void handleSetCTimeStatic(AsyncWebServerRequest *request);
+        static void handleRestartStatic(AsyncWebServerRequest *request);
+        void handleRoot(AsyncWebServerRequest *request);
         void handleWlanSave();
         void handleStart();
         void handleFirmwareUpdate();
+        void handleSetCTime(AsyncWebServerRequest *request);
+        void handleRestart(AsyncWebServerRequest *request);
+        // void initWebSocket(void);
+        // static void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
+        // void WebsiteManager::notifyClients();
+        // void WebsiteManager::handleWebSocketMessage(void *arg, uint8_t *data, size_t len);
 
     //--------------------------- Variables -----------------------------------------
     public:

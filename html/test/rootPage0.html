@@ -1,5 +1,5 @@
 <html>
-    <meta name='viewport' content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no'/>
+<meta name='viewport' content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no' />
 <style>
     body {
         text-align: center;
@@ -13,23 +13,20 @@
 </style>
 
 <body>
-
     <h1>ESP-Konfiguration</h1>
-
     <form action='/load'>
         <h2>Overview</h2>
-        <div>Version: 1.0</div>
-        <input type='submit' value='ESP Start'>
+        <div>Version: 1.0</div> <input type='submit' value='ESP Start'>
     </form>
     <form action='/speichern'>
         <h2>WLAN - Settings</h2>
         <div>SSID</div><input type='text' name='ssid'><br>
         <div>Password: </div><input type='password' name='password'><br><input type='submit' value='Save'>
     </form>
-    <form method='POST' action='/update' enctype='multipart/form-data'>
-        <input type='file' name='update'>
-        <input type='submit' value='Update'>
-    </form>
+    <form method='POST' action='/update' enctype='multipart/form-data'> <input type='file' name='update'> <input
+            type='submit' value='Update'> </form>
+    <div id="terminal"></div>
+    <script> var connection = new WebSocket('ws://[ESP32_IP]:81'); connection.onmessage = function (e) { var server_message = e.data; document.getElementById('terminal').innerHTML += server_message + '<br>'; }; </script>
 </body>
 
 </html>
