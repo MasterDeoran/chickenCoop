@@ -51,7 +51,7 @@ void setup(void) {
   EEPROMManager::initialize();
   IManager.initialize();
   website.initialize();
-  Serial.println("");
+  Serial.println("Start des Microcontrollers");
 
 }
 
