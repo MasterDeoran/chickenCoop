@@ -1,74 +1,96 @@
-<table style="width:100%">
-    <tbody>
-        <tr>
-            <th></th>
-            <th></th>
-            <th style="text-align:center"></th>
-            <th></th>
-            <td></td>
-        </tr>
-        <tr>
-            <th>Voltage</th>
-            <td style="width:20px;white-space:nowrap"></td>
-            <td style="text-align:left">232</td>
-            <td>&nbsp;</td>
-            <td> V</td>
-        </tr>
-        <tr>
-            <th>Current</th>
-            <td style="width:20px;white-space:nowrap"></td>
-            <td style="text-align:left">0.000</td>
-            <td>&nbsp;</td>
-            <td> A</td>
-        </tr>
-        <tr>
-            <th>Active Power</th>
-            <td style="width:20px;white-space:nowrap"></td>
-            <td style="text-align:left">0</td>
-            <td>&nbsp;</td>
-            <td> W</td>
-        </tr>
-        <tr>
-            <th>Apparent Power</th>
-            <td style="width:20px;white-space:nowrap"></td>
-            <td style="text-align:left">0</td>
-            <td>&nbsp;</td>
-            <td> VA</td>
-        </tr>
-        <tr>
-            <th>Reactive Power</th>
-            <td style="width:20px;white-space:nowrap"></td>
-            <td style="text-align:left">0</td>
-            <td>&nbsp;</td>
-            <td> VAr</td>
-        </tr>
-        <tr>
-            <th>Power Factor</th>
-            <td style="width:20px;white-space:nowrap"></td>
-            <td style="text-align:left">0.00</td>
-            <td>&nbsp;</td>
-            <td></td>
-        </tr>
-        <tr>
-            <th>Energy Today</th>
-            <td style="width:20px;white-space:nowrap"></td>
-            <td style="text-align:left">0.000</td>
-            <td>&nbsp;</td>
-            <td> kWh</td>
-        </tr>
-        <tr>
-            <th>Energy Yesterday</th>
-            <td style="width:20px;white-space:nowrap"></td>
-            <td style="text-align:left">0.000</td>
-            <td>&nbsp;</td>
-            <td> kWh</td>
-        </tr>
-        <tr>
-            <th>Energy Total</th>
-            <td style="width:20px;white-space:nowrap"></td>
-            <td style="text-align:left">11.494</td>
-            <td>&nbsp;</td>
-            <td> kWh</td>
-        </tr>
-    </tbody>
-</table>
+<html>
+
+<head>
+    <meta charset="utf-8" name='viewport' content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no'>
+    <style>
+        body {
+            text-align: center;
+            background-color: cornflowerblue;
+            max-width: 340px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        th {
+            text-align: left;
+            padding-right: 32px;
+        }
+
+        div,
+        input {
+            margin: 5px;
+        }
+
+        .btn>button {
+            border: 0;
+            border-radius: 0.3rem;
+            line-height: 2.4rem;
+            font-size: 1.2rem;
+            width: 100%;
+            cursor: pointer;
+            transition-duration: 0.4s;
+        }
+
+        .btn>button:hover {
+            background: goldenrod;
+        }
+
+        .btn-red>button {
+            background: #d43535;
+        }
+
+        .btn-red>button:hover {
+            background: darkred;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>ESP-Webserver</h1>
+    <form action='/load'>
+        <h2>Overview</h2>
+        <div>Version: 1.0</div> <input type='submit' value='ESP Start'>
+    </form>
+    <div>
+        <table></table>
+        <hr>
+        <table>
+            <tbody>
+                <tr>
+                    <th>Aktuelle Uhrzeit</th>
+                    <td style="width:20px;white-space:nowrap">%%TIME%%</td>
+                </tr>
+                <tr>
+                    <th>Motor Drehrichtung</th>
+                    <td style="width:20px;white-space:nowrap">%%ENGINE%%</td>
+                </tr>
+                <tr>
+                    <th>Endlagenschalter Oben</th>
+                    <td style="width:20px;white-space:nowrap">%%ENDUP%%</td>
+                </tr>
+                <tr>
+                    <th>Endlagenschalter Unten</th>
+                    <td style="width:20px;white-space:nowrap">%%ENDDOWN%%</td>
+                </tr>
+                <tr>
+                    <th>Lichtsensor</th>
+                    <td style="width:20px;white-space:nowrap">%%LIGHT%%</td>
+                </tr>
+                <tr>
+                    <th>WLAN</th>
+                    <td style="width:20px;white-space:nowrap">%%WIFI%%</td>
+                </tr>
+            </tbody>
+        </table>
+        <hr>
+        <table></table>
+    </div>
+    <form class="btn" action='/config'> <button>Konfiguration</button> </form>
+    <form class="btn" action='/actions'> <button>Aktionen</button> </form>
+    <form class="btn" action='/info'> <button>Informationen</button> </form>
+    <form class="btn" action='/update'> <button>Firmware Upgrade</button> </form>
+    <form class="btn btn-red" action='/reset'> <button>Neustarten</button> </form>
+</body>
+
+</html> )rawliteral";

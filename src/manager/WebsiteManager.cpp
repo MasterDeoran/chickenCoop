@@ -112,8 +112,16 @@ void WebsiteManager::websiteInit() {
     server.on("/config", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/html", config_html);
     });
+    server.on("/action", HTTP_GET, handleActionStatic);
     server.on("/setCTime", HTTP_GET, handleSetCTimeStatic);
     server.on("/reset", HTTP_GET, handleRestartStatic);
+
+    server.on("/setE1", HTTP_GET, handleSetE1Static);
+    server.on("/setE2", HTTP_GET, handleSetE2Static);
+    server.on("/setL1", HTTP_GET, handleSetL1Static);
+    server.on("/setL2", HTTP_GET, handleSetL2Static);
+    server.on("/setL3", HTTP_GET, handleSetL3Static);
+
     AsyncElegantOTA.begin(&server);    // Start AsyncElegantOTA
     //server.begin();
     server.begin();
@@ -203,6 +211,45 @@ void WebsiteManager::handleRoot(AsyncWebServerRequest *request)
     
 }
 
+//---------------------------------------------------------------------------------------------------------------------
+//  Action
+//---------------------------------------------------------------------------------------------------------------------
+
+void WebsiteManager::handleActionStatic(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleAction(request);
+    }
+}
+
+void WebsiteManager::handleAction(AsyncWebServerRequest *request)
+{
+    Serial.println("[Website][ACTION] Neuer Serveraufruf!");
+    String html;
+    html = action_html;
+
+    Serial.println("[Website][ACTION] Call Time");
+    String time = hour() < 10 ? "0" + String(hour()) : String(hour());
+    time += ":";
+    time += minute() < 10 ? "0" + String(minute()) : String(minute());
+
+    Serial.println("[Website][ACTION] Call Engine");
+    String engine = "Aus";
+    if (IEngineLeft.status()) engine = "Linksdrehend";
+    if (IEngineRight.status()) engine = "Rechtsdrehend";
+
+    Serial.println("[Website][ACTION] HTML Replaces");
+    html.replace("%%STATUSE1%%", IEngineLeft.status()?"ON":"OFF");
+    html.replace("%%STATUSE2%%", IEngineRight.status()?"ON":"OFF");
+    html.replace("%%STATUSL1%%", ILedGreen.status()?"ON":"OFF");
+    html.replace("%%STATUSL2%%", ILedOrange.status()?"ON":"OFF");
+    html.replace("%%STATUSL3%%", ILedRed.status()?"ON":"OFF");
+
+    //server.send(200, "text/html", html);
+    Serial.println("[Website][ACTION] Send Site");
+    request->send(200, "text/html", html);
+    
+}
+
 void WebsiteManager::handleStart()
 {
 
@@ -269,6 +316,56 @@ void WebsiteManager::handleSetCTime(AsyncWebServerRequest *request) {
 
 void WebsiteManager::handleFirmwareUpdate() {
 
+}
+
+void WebsiteManager::handleSetE1Static(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleSetE1(request);
+    }
+}
+void WebsiteManager::handleSetE1(AsyncWebServerRequest *request) {
+    IEngineLeft.setToggle();
+    this->handleAction(request);
+}
+
+void WebsiteManager::handleSetE2Static(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleSetE2(request);
+    }
+}
+void WebsiteManager::handleSetE2(AsyncWebServerRequest *request) {
+    IEngineRight.setToggle();
+    this->handleAction(request);
+}
+
+void WebsiteManager::handleSetL1Static(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleSetL1(request);
+    }
+}
+void WebsiteManager::handleSetL1(AsyncWebServerRequest *request) {
+    ILedGreen.setToggle();
+    this->handleAction(request);
+}
+
+void WebsiteManager::handleSetL2Static(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleSetL2(request);
+    }
+}
+void WebsiteManager::handleSetL2(AsyncWebServerRequest *request) {
+    ILedOrange.setToggle();
+    this->handleAction(request);
+}
+
+void WebsiteManager::handleSetL3Static(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleSetL3(request);
+    }
+}
+void WebsiteManager::handleSetL3(AsyncWebServerRequest *request) {
+    ILedRed.setToggle();
+    this->handleAction(request);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

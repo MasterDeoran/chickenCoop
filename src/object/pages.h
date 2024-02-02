@@ -5,6 +5,7 @@
 
     extern const char index_html[];
     extern const char config_html[];
+    extern const char action_html[];
     
 
 #endif

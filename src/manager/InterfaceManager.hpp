@@ -30,6 +30,7 @@ class interface {
         void setOutput() { pinMode(this->_pin, OUTPUT); }
         void setOn() { digitalWrite(this->_pin, HIGH); }
         void setOff() { digitalWrite(this->_pin, LOW); }
+        void setToggle() { digitalWrite(this->_pin, !this->status()); }
     private:
 
     //--------------------------- Variables -----------------------------------------
