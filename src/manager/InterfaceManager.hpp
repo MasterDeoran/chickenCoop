@@ -20,6 +20,7 @@
 #define LEDOrange D8
 
 #include <Arduino.h>
+#include "EEPROMManager.hpp"
 
 class interface {
     //--------------------------- Methods -----------------------------------------
@@ -35,8 +36,9 @@ class interface {
 
     //--------------------------- Variables -----------------------------------------
     public:
-    private:
         unsigned char _pin;
+    private:
+        
 
 };
 //-----------------------------------------------------------------------------
@@ -48,10 +50,36 @@ class InterfaceManager {
     public:
         InterfaceManager() {};
         void initialize(void);
+        // FALSE: left:M1 right:M2, TRUE left:M2 right:M1
+        void setEngine(bool direction);
+        void onEngineLeft(void);
+        void offEngineLeft(void);
+        void onEngineRight(void);
+        void offEngineRight(void);
+        void offEngines(void);
+
+        void setTime1(bool engine, bool limit, bool signal, int hour, int min);
+        void setTime2(bool engine, bool limit, bool signal, int hour, int min);
+
+        void loop();
+
     private:
 
     //--------------------------- Variables -----------------------------------------
     public:
+        bool _direction;
+        
+        bool _time1engine;
+        bool _time1limit;
+        bool _time1signal;
+        int _time1hour;
+        int _time1min;
+        bool _time2engine;
+        bool _time2limit;
+        bool _time2signal;
+        int _time2hour;
+        int _time2min;
+
     private:
 
 };

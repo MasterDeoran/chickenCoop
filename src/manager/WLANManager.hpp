@@ -18,7 +18,8 @@
     #error "Bitte wählen Sie entweder ESP32 oder ESP8266 als Zielplattform aus!"
 #endif
 
-
+#include "EEPROMManager.hpp"
+#include "../config.h"
 
 
 //-----------------------------------------------------------------------------
@@ -30,22 +31,45 @@ class WLANManager {
     public:
         WLANManager();
         WLANManager(const char* ssid, const char* password);
-        void verbindeMitWLAN();
+        void initializeSoftAP(void);
+        void openSoftAP(void);
+        void closeSoftAP(void);
+        void verbinde();
         bool istWLANVerbunden();
+        void setOn(void);
+        void setOff(void);
         String getWifiMac();
         String getSSID();
+        String getPassword();
         String getIPAdress();
         wl_status_t status();
 
         void setSSID(String ssid);
         void setPassword(String password);
+        void update(void);
+
+    enum mwifi_state_t {
+        WIFI_STATE_WAITING_FOR_CONNECTION,
+        WIFI_STATE_CONNECTED,
+        WIFI_STATE_DISCONNECTED,
+    };
+
     private:
-        String getPassword();
+        void verbindeMitWLAN();
     //--------------------------- Variables -----------------------------------------
     public:
     private:
-        String _ssid = "\0";
-        String _password = "\0";
+        String _ssid = "";
+        String _password = "";
+        unsigned long _lastConnect = 0;
+        unsigned long _wifiInterval = 60000;
+        bool _initialize = false;
+        bool _enabled = false;
+        mwifi_state_t _state = WIFI_STATE_WAITING_FOR_CONNECTION;
+        String espName;
+        IPAddress local_IP;
+        IPAddress gateway;
+        IPAddress subnet;
 
 };
 

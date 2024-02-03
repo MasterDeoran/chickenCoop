@@ -45,62 +45,8 @@ WebsiteManager::WebsiteManager() {
 }
 
 void WebsiteManager::initialize() {
-
-    this->local_IP = AP_LOCAL_IP;
-    this->gateway = AP_GATEWAY;
-    this->subnet = AP_SUBNET;
-    this->espName = AP_SSID;
-
-    // Konfiguriere den SoftAP-Modus mit der statischen IP
-    if (!WiFi.softAPConfig(this->local_IP, this->gateway, this->subnet))
-    {
-        Serial.println("SoftAP Konfiguration fehlgeschlagen!");
-    }
-
-    // Initialisiere das WLAN und den Webserver
-    WiFi.softAP(this->espName.c_str());
     this->websiteInit();
-
-    startZeit = millis(); // Initialisiere den Timer beim Start
 }
-
-// void WebsiteManager::onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
-//              void *arg, uint8_t *data, size_t len) {
-//     switch (type) {
-//       case WS_EVT_CONNECT:
-//         Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
-//         break;
-//       case WS_EVT_DISCONNECT:
-//         Serial.printf("WebSocket client #%u disconnected\n", client->id());
-//         break;
-//       case WS_EVT_DATA:
-//         handleWebSocketMessage(arg, data, len);
-//         break;
-//       case WS_EVT_PONG:
-//       case WS_EVT_ERROR:
-//         break;
-//   }
-// }
-
-// void WebsiteManager::notifyClients() {
-//   ws.textAll(String(ledState));
-// }
-
-// void WebsiteManager::handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
-//   AwsFrameInfo *info = (AwsFrameInfo*)arg;
-//   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-//     data[len] = 0;
-//     if (strcmp((char*)data, "toggle") == 0) {
-//       ledState = !ledState;
-//       notifyClients();
-//     }
-//   }
-// }
-
-// void WebsiteManager::initWebSocket() {
-//   //ws.onEvent(onEvent);
-//   server.addHandler(&ws);
-// }
 
 void WebsiteManager::websiteInit() {
 
@@ -110,38 +56,38 @@ void WebsiteManager::websiteInit() {
     server.on("/", HTTP_GET, handleRootStatic);
         //request->send_P(200, "text/html", index_html, processor);
     server.on("/config", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(200, "text/html", config_html);
+        request->send(200, "text/html", configMenu_html);
     });
+    server.on("/cw", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/html", configWLAN_html);
+    });
+    server.on("/co", HTTP_GET, handleOutputStatic);
+    server.on("/cc1", HTTP_GET, handleControl1Static);
+    server.on("/cc2", HTTP_GET, handleControl2Static);
+    server.on("/ct", HTTP_GET, handleTimeStatic);
+
+    
     server.on("/action", HTTP_GET, handleActionStatic);
     server.on("/setCTime", HTTP_GET, handleSetCTimeStatic);
     server.on("/reset", HTTP_GET, handleRestartStatic);
 
     server.on("/setE1", HTTP_GET, handleSetE1Static);
+    server.on("/setE1w", HTTP_GET, handleSetE1wStatic);
     server.on("/setE2", HTTP_GET, handleSetE2Static);
+    server.on("/setE2w", HTTP_GET, handleSetE2wStatic);
     server.on("/setL1", HTTP_GET, handleSetL1Static);
     server.on("/setL2", HTTP_GET, handleSetL2Static);
     server.on("/setL3", HTTP_GET, handleSetL3Static);
 
+    server.on("/saveWifi", HTTP_GET, handleSetWifiStatic);
+    server.on("/saveOutput", HTTP_GET, handleSetOutputStatic);
+    server.on("/saveTime1", HTTP_GET, handleSetTime1Static);
+    server.on("/saveTime2", HTTP_GET, handleSetTime2Static);
+
     AsyncElegantOTA.begin(&server);    // Start AsyncElegantOTA
-    //server.begin();
     server.begin();
     Serial.println("HTTP server started");
 
-
-    
-    // server.on("/speichern", handleWlanSaveStatic);
-    // server.on("/load", handleStartStatic);
-    // server.on("/update", HTTP_POST, []() {
-    //     server.sendHeader("Connection", "close");
-    //     server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
-    //     ESP.restart();
-    //     }, []() { 
-    //         #ifdef ESP32 
-    //             otaUpdater.handleFirmwareUpload(); 
-    //         #endif;
-    // });
-
-    // server.begin();
 }
 
 bool WebsiteManager::isInitialize() {
@@ -200,8 +146,8 @@ void WebsiteManager::handleRoot(AsyncWebServerRequest *request)
     html.replace("%s3%", wlan.getIPAdress());
     html.replace("%%TIME%%", time);
     html.replace("%%ENGINE%%", engine);
-    html.replace("%%ENDUP%%", ILimitUp.status()?"Nicht erreicht":"Erreicht");
-    html.replace("%%ENDDOWN%%", ILimitDown.status()?"Nicht erreicht":"Erreicht");
+    html.replace("%%ENDUP%%", ILimitUp.status()?"HIGH-Pegel":"LOW-Pegel");
+    html.replace("%%ENDDOWN%%", ILimitDown.status()?"HIGH-Pegel":"LOW-Pegel");
     html.replace("%%LIGHT%%", ILightSensor.status()?"Aktiv":"Inaktiv");
     html.replace("%%WIFI%%", wlan.istWLANVerbunden()?"connected":"disconnected");
 
@@ -223,21 +169,21 @@ void WebsiteManager::handleActionStatic(AsyncWebServerRequest *request) {
 
 void WebsiteManager::handleAction(AsyncWebServerRequest *request)
 {
-    Serial.println("[Website][ACTION] Neuer Serveraufruf!");
+    Serial.println("[Website][ACTI] Neuer Serveraufruf!");
     String html;
     html = action_html;
 
-    Serial.println("[Website][ACTION] Call Time");
+    Serial.println("[Website][ACTI] Call Time");
     String time = hour() < 10 ? "0" + String(hour()) : String(hour());
     time += ":";
     time += minute() < 10 ? "0" + String(minute()) : String(minute());
 
-    Serial.println("[Website][ACTION] Call Engine");
+    Serial.println("[Website][ACTI] Call Engine");
     String engine = "Aus";
     if (IEngineLeft.status()) engine = "Linksdrehend";
     if (IEngineRight.status()) engine = "Rechtsdrehend";
 
-    Serial.println("[Website][ACTION] HTML Replaces");
+    Serial.println("[Website][ACTI] HTML Replaces");
     html.replace("%%STATUSE1%%", IEngineLeft.status()?"ON":"OFF");
     html.replace("%%STATUSE2%%", IEngineRight.status()?"ON":"OFF");
     html.replace("%%STATUSL1%%", ILedGreen.status()?"ON":"OFF");
@@ -245,7 +191,121 @@ void WebsiteManager::handleAction(AsyncWebServerRequest *request)
     html.replace("%%STATUSL3%%", ILedRed.status()?"ON":"OFF");
 
     //server.send(200, "text/html", html);
-    Serial.println("[Website][ACTION] Send Site");
+    Serial.println("[Website][ACTI] Send Site");
+    request->send(200, "text/html", html);
+    
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+//  Output
+//---------------------------------------------------------------------------------------------------------------------
+
+void WebsiteManager::handleOutputStatic(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleOutput(request);
+    }
+}
+
+void WebsiteManager::handleOutput(AsyncWebServerRequest *request)
+{
+    String html;
+    html = configOutput_html;
+
+    Serial.println("[Website][OUTP] HTML Replaces");
+    html.replace("%%M1%%", IManager._direction?"Rechtslauf":"Linkslauf");
+    html.replace("%%M2%%", IManager._direction?"Linkslauf":"Rechtslauf");
+    html.replace("%%STATUSE1%%", IEngineLeft.status()?"ON":"OFF");
+    html.replace("%%STATUSE2%%", IEngineRight.status()?"ON":"OFF");
+
+    Serial.println("[Website][OUTP] Send Site");
+    request->send(200, "text/html", html);
+    
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+//  Output
+//---------------------------------------------------------------------------------------------------------------------
+
+void WebsiteManager::handleControl1Static(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleControl1(request);
+    }
+}
+
+void WebsiteManager::handleControl1(AsyncWebServerRequest *request)
+{
+    String html;
+    html = configControl1_html;
+
+    Serial.println("[Website][CONT] HTML Replaces");
+    html.replace("%%h1%%", ("value='" + String(IManager._time1hour) + "'"));
+    html.replace("%%m1%%", ("value='" + String(IManager._time1min) + "'"));
+    html.replace("%%s11%%", IManager._time1engine?"":"selected");
+    html.replace("%%s12%%", IManager._time1engine?"selected":"");
+    html.replace("%%s13%%", IManager._time1limit?"":"selected");
+    html.replace("%%s14%%", IManager._time1limit?"selected":"");
+    html.replace("%%s15%%", IManager._time1signal?"":"selected");
+    html.replace("%%s16%%", IManager._time1signal?"selected":"");
+
+    Serial.println("[Website][CONT] Send Site");
+    request->send(200, "text/html", html);
+    
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+//  Output
+//---------------------------------------------------------------------------------------------------------------------
+
+void WebsiteManager::handleControl2Static(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleControl2(request);
+    }
+}
+
+void WebsiteManager::handleControl2(AsyncWebServerRequest *request)
+{
+    String html;
+    html = configControl2_html;
+
+    Serial.println("[Website][CONT] HTML Replaces");
+    html.replace("%%h2%%", ("value='" + String(IManager._time2hour) + "'"));
+    html.replace("%%m2%%", ("value='" + String(IManager._time2min) + "'"));
+    html.replace("%%s21%%", IManager._time2engine?"":"selected");
+    html.replace("%%s22%%", IManager._time2engine?"selected":"");
+    html.replace("%%s23%%", IManager._time2limit?"":"selected");
+    html.replace("%%s24%%", IManager._time2limit?"selected":"");
+    html.replace("%%s25%%", IManager._time2signal?"":"selected");
+    html.replace("%%s26%%", IManager._time2signal?"selected":"");
+
+    Serial.println("[Website][CONT] Send Site");
+    request->send(200, "text/html", html);
+    
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+//  Tiome
+//---------------------------------------------------------------------------------------------------------------------
+
+void WebsiteManager::handleTimeStatic(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleTime(request);
+    }
+}
+
+void WebsiteManager::handleTime(AsyncWebServerRequest *request)
+{
+    String html;
+    html = configTime_html;
+
+    Serial.println("[Website][TIME] Call Time");
+    String time = hour() < 10 ? "0" + String(hour()) : String(hour());
+    time += ":";
+    time += minute() < 10 ? "0" + String(minute()) : String(minute());
+
+    Serial.println("[Website][TIME] HTML Replaces");
+    html.replace("%%TIME%%", time);
+
+    Serial.println("[Website][TIME] Send Site");
     request->send(200, "text/html", html);
     
 }
@@ -254,7 +314,7 @@ void WebsiteManager::handleStart()
 {
 
     String ssid = EEPROMManager::leseWlanSSID();
-    String password = EEPROMManager::leseWlanPasswort();
+    String password = EEPROMManager::leseWlanPassword();
 
     Serial.print("SSID: " + ssid + "\n");
     Serial.print("PW:   " + password + "\n");
@@ -324,6 +384,7 @@ void WebsiteManager::handleSetE1Static(AsyncWebServerRequest *request) {
     }
 }
 void WebsiteManager::handleSetE1(AsyncWebServerRequest *request) {
+    
     IEngineLeft.setToggle();
     this->handleAction(request);
 }
@@ -336,6 +397,26 @@ void WebsiteManager::handleSetE2Static(AsyncWebServerRequest *request) {
 void WebsiteManager::handleSetE2(AsyncWebServerRequest *request) {
     IEngineRight.setToggle();
     this->handleAction(request);
+}
+
+void WebsiteManager::handleSetE1wStatic(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleSetE1w(request);
+    }
+}
+void WebsiteManager::handleSetE1w(AsyncWebServerRequest *request) {
+    IEngineLeft.setToggle();
+    this->handleOutput(request);
+}
+
+void WebsiteManager::handleSetE2wStatic(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleSetE2w(request);
+    }
+}
+void WebsiteManager::handleSetE2w(AsyncWebServerRequest *request) {
+    IEngineRight.setToggle();
+    this->handleOutput(request);
 }
 
 void WebsiteManager::handleSetL1Static(AsyncWebServerRequest *request) {
@@ -369,6 +450,119 @@ void WebsiteManager::handleSetL3(AsyncWebServerRequest *request) {
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+//  Set WIFI
+//---------------------------------------------------------------------------------------------------------------------
+
+void WebsiteManager::handleSetWifiStatic(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleSetWifi(request);
+    }
+}
+void WebsiteManager::handleSetWifi(AsyncWebServerRequest *request) {
+
+    int paramsNr = request->params();
+    String ssid, password;
+
+    for(int i=0; i<paramsNr; i++){
+        AsyncWebParameter* p = request->getParam(i);
+        if(p->name() == "ssid"){
+            ssid = p->value();
+        } else if(p->name() == "password"){
+            password = p->value();
+        }
+    }   
+
+    // Hier sollten die Daten im EEPROM gespeichert werden
+
+    Serial.print("SSID: " + ssid + "\n");
+    Serial.print("PW:   " + password + "\n");
+
+    wlan.setSSID(ssid);
+    wlan.setPassword(password);
+
+    EEPROMManager::speichereWlanDaten(wlan.getSSID(), wlan.getPassword());
+
+    wlan.verbinde();
+    request->send(200, "text/html", configWLAN_html);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+//  Set Output
+//---------------------------------------------------------------------------------------------------------------------
+
+void WebsiteManager::handleSetOutputStatic(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleSetOutput(request);
+    }
+}
+void WebsiteManager::handleSetOutput(AsyncWebServerRequest *request) {
+    int paramsNr = request->params();
+    String value;
+
+    for(int i=0; i<paramsNr; i++){
+        AsyncWebParameter* p = request->getParam(i);
+        if(p->name() == "engine1"){
+            IManager.setEngine(p->value() == "1"?true:false);
+        }
+    }   
+    handleOutput(request); 
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+//  Set Time 1
+//---------------------------------------------------------------------------------------------------------------------
+
+void WebsiteManager::handleSetTime1Static(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleSetTime1(request);
+    }
+}
+void WebsiteManager::handleSetTime1(AsyncWebServerRequest *request) {
+    int paramsNr = request->params();
+    bool engine, limit, signal;
+    int hour, min;
+
+    for(int i=0; i<paramsNr; i++){
+        AsyncWebParameter* p = request->getParam(i);
+        if(p->name() == "engine1")  engine = (p->value() == "1"?true:false);
+        else if (p->name() == "limit1") limit = (p->value() == "1"?true:false);
+        else if (p->name() == "hour") hour = p->value().toInt();
+        else if (p->name() == "min") min = p->value().toInt();
+        else if (p->name() == "signal1") signal = (p->value() == "1"?true:false);
+    }   
+    IManager.setTime1(engine, limit, signal, hour, min);
+    
+    handleControl1(request); 
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+//  Set Time 2
+//---------------------------------------------------------------------------------------------------------------------
+
+void WebsiteManager::handleSetTime2Static(AsyncWebServerRequest *request) {
+    if (instance) {
+        instance->handleSetTime2(request);
+    }
+}
+void WebsiteManager::handleSetTime2(AsyncWebServerRequest *request) {
+    int paramsNr = request->params();
+    bool engine, limit, signal;
+    int hour, min;
+
+    for(int i=0; i<paramsNr; i++){
+        AsyncWebParameter* p = request->getParam(i);
+        if(p->name() == "engine2")  engine = (p->value() == "1"?true:false);
+        else if (p->name() == "limit2") limit = (p->value() == "1"?true:false);
+        else if (p->name() == "hour") hour = p->value().toInt();
+        else if (p->name() == "min") min = p->value().toInt();
+        else if (p->name() == "signal2") signal = (p->value() == "1"?true:false);
+    }   
+    IManager.setTime2(engine, limit, signal, hour, min);
+    
+    handleControl2(request); 
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 //  Restart
 //---------------------------------------------------------------------------------------------------------------------
 
@@ -398,3 +592,40 @@ WebsiteManager website;
 //=============================================================================
 
 
+// void WebsiteManager::onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
+//              void *arg, uint8_t *data, size_t len) {
+//     switch (type) {
+//       case WS_EVT_CONNECT:
+//         Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+//         break;
+//       case WS_EVT_DISCONNECT:
+//         Serial.printf("WebSocket client #%u disconnected\n", client->id());
+//         break;
+//       case WS_EVT_DATA:
+//         handleWebSocketMessage(arg, data, len);
+//         break;
+//       case WS_EVT_PONG:
+//       case WS_EVT_ERROR:
+//         break;
+//   }
+// }
+
+// void WebsiteManager::notifyClients() {
+//   ws.textAll(String(ledState));
+// }
+
+// void WebsiteManager::handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
+//   AwsFrameInfo *info = (AwsFrameInfo*)arg;
+//   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
+//     data[len] = 0;
+//     if (strcmp((char*)data, "toggle") == 0) {
+//       ledState = !ledState;
+//       notifyClients();
+//     }
+//   }
+// }
+
+// void WebsiteManager::initWebSocket() {
+//   //ws.onEvent(onEvent);
+//   server.addHandler(&ws);
+// }
