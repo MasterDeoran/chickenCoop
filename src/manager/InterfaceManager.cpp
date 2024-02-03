@@ -43,6 +43,16 @@ void InterfaceManager::initialize(void) {
     ILightSensor.setInput();
 }
 
+void InterfaceManager::toggleEngineLeft(void) {
+    if (IEngineLeft.status()) this->offEngineLeft();
+    else this->onEngineLeft();
+}
+
+void InterfaceManager::toggleEngineRight(void) {
+    if (IEngineRight.status()) this->offEngineRight();
+    else this->onEngineRight();
+}
+
 void InterfaceManager::onEngineLeft(void) {
     Serial.println("[INTERFACE][ENGI] Left Engines on");
     IEngineRight.setOff();

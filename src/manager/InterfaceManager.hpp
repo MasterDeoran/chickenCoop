@@ -54,8 +54,10 @@ class InterfaceManager {
         void setEngine(bool direction);
         void onEngineLeft(void);
         void offEngineLeft(void);
+        void toggleEngineLeft(void);
         void onEngineRight(void);
         void offEngineRight(void);
+        void toggleEngineRight(void);
         void offEngines(void);
 
         void setTime1(bool engine, bool limit, bool signal, int hour, int min);

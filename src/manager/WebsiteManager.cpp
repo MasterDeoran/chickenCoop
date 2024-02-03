@@ -385,7 +385,7 @@ void WebsiteManager::handleSetE1Static(AsyncWebServerRequest *request) {
 }
 void WebsiteManager::handleSetE1(AsyncWebServerRequest *request) {
     
-    IEngineLeft.setToggle();
+    IManager.toggleEngineLeft();
     this->handleAction(request);
 }
 
@@ -395,7 +395,7 @@ void WebsiteManager::handleSetE2Static(AsyncWebServerRequest *request) {
     }
 }
 void WebsiteManager::handleSetE2(AsyncWebServerRequest *request) {
-    IEngineRight.setToggle();
+    IManager.toggleEngineRight();
     this->handleAction(request);
 }
 
@@ -405,7 +405,7 @@ void WebsiteManager::handleSetE1wStatic(AsyncWebServerRequest *request) {
     }
 }
 void WebsiteManager::handleSetE1w(AsyncWebServerRequest *request) {
-    IEngineLeft.setToggle();
+    IManager.toggleEngineLeft();
     this->handleOutput(request);
 }
 
@@ -415,7 +415,7 @@ void WebsiteManager::handleSetE2wStatic(AsyncWebServerRequest *request) {
     }
 }
 void WebsiteManager::handleSetE2w(AsyncWebServerRequest *request) {
-    IEngineRight.setToggle();
+    IManager.toggleEngineRight();
     this->handleOutput(request);
 }
 
